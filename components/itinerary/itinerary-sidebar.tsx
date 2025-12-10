@@ -25,6 +25,12 @@ interface TripData {
   dailyBudget: number
   budgetRange: string
   interests: string[]
+  activities?: {
+    name: string
+    date: string
+    location: string
+    description: string
+  }[]
 }
 
 export function ItinerarySidebar({ tripId }: ItinerarySidebarProps) {
@@ -254,7 +260,7 @@ export function ItinerarySidebar({ tripId }: ItinerarySidebarProps) {
 </Card>
 
         {/* AI Chat */}
-        <AIChat />
+        <AIChat trip={tripData} activities={tripData.activities || []} />
       </div>
 
       <DeleteConfirmationDialog

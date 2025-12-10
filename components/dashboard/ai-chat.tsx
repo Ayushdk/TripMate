@@ -13,7 +13,13 @@ interface ChatMessage {
   timestamp: Date
 }
 
-export function AIChat() {
+// 👇 NEW: tripId ko prop bana diya
+interface AIChatProps {
+  trip?: any
+  activities?: any[]
+}
+
+export function AIChat({ trip, activities  }: AIChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
@@ -43,13 +49,18 @@ export function AIChat() {
       const res = await fetch("http://127.0.0.1:5000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: inputValue }),
+        body: JSON.stringify({
+          message: inputValue,
+          // 👇 IMPORTANT: ab yaha se backend ko tripId jaa raha hai
+          trip: trip,
+          activities: activities,
+        }),
       })
-      
+
       if (!res.ok) {
         throw new Error(`Server responded with status: ${res.status}`)
       }
-      
+
       const data = await res.json()
 
       const aiMessage: ChatMessage = {
@@ -63,9 +74,10 @@ export function AIChat() {
       console.error("Error sending message:", err)
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
-        content: err instanceof Error && err.message.includes("fetch")
-          ? "Unable to connect to the AI service. Please make sure the backend server is running on port 5000."
-          : "Oops! Something went wrong. Please try again.",
+        content:
+          err instanceof Error && err.message.includes("fetch")
+            ? "Unable to connect to the AI service. Please make sure the backend server is running on port 5000."
+            : "Oops! Something went wrong. Please try again.",
         isUser: false,
         timestamp: new Date(),
       }
@@ -133,8 +145,14 @@ export function AIChat() {
                 <div className="bg-muted text-foreground rounded-lg px-3 py-2 text-sm">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                    <div className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    <div
+                      className="w-2 h-2 bg-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
