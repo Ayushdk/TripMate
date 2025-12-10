@@ -201,11 +201,28 @@ export function TripCreationForm() {
       if (!response.ok) throw new Error('Failed to create trip')
 
       const newTrip = await response.json()
-      setSuccessMessage("Trip created successfully! Redirecting...")
+      setSuccessMessage("Trip created successfully! Generating itinerary...")
+
+      // Generate itinerary automatically
+      try {
+        const itineraryResponse = await fetch(`/api/trips/${newTrip._id}/generate-itinerary`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        if (itineraryResponse.ok) {
+          setSuccessMessage("Trip created and itinerary generated! Redirecting...")
+        } else {
+          setSuccessMessage("Trip created! You can generate itinerary later. Redirecting...")
+        }
+      } catch (itineraryError) {
+        console.warn('Could not generate itinerary automatically:', itineraryError)
+        setSuccessMessage("Trip created! You can generate itinerary later. Redirecting...")
+      }
 
       setTimeout(() => {
         router.push(`/trips/${newTrip._id}`)
-      }, 1500)
+      }, 2000)
     } catch (error) {
       console.error('Error creating trip:', error)
       setValidationError('Failed to create trip. Please try again.')

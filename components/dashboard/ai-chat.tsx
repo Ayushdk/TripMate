@@ -39,17 +39,40 @@ export function AIChat() {
     setInputValue("")
     setIsLoading(true)
 
-    // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: inputValue }),
+      })
+      
+      if (!res.ok) {
+        throw new Error(`Server responded with status: ${res.status}`)
+      }
+      
+      const data = await res.json()
+
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: "I understand you're asking about that. Let me help you with some suggestions and information to make your trip planning easier.",
+        content: data.reply || "Sorry, I didn't receive a response.",
         isUser: false,
         timestamp: new Date(),
       }
       setMessages(prev => [...prev, aiMessage])
+    } catch (err) {
+      console.error("Error sending message:", err)
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        content: err instanceof Error && err.message.includes("fetch")
+          ? "Unable to connect to the AI service. Please make sure the backend server is running on port 5000."
+          : "Oops! Something went wrong. Please try again.",
+        isUser: false,
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
